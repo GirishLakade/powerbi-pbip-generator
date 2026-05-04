@@ -84,13 +84,40 @@ in
         # --- Semantic Model Directory ---
         sm_dir = f"{project_name}.SemanticModel"
         zip_file.writestr(f"{sm_dir}/model.bim", json.dumps(model_bim, indent=2))
-        zip_file.writestr(f"{sm_dir}/item.metadata.json", json.dumps({"type": "dataset"}, indent=2))
-        zip_file.writestr(f"{sm_dir}/item.config.json", json.dumps({"logicalId": str(uuid.uuid4())}, indent=2))
+        zip_file.writestr(f"{sm_dir}/item.metadata.json", json.dumps({"type": "dataset", "displayName": project_name}, indent=2))
+        zip_file.writestr(f"{sm_dir}/item.config.json", json.dumps({"version": "1.0", "logicalId": str(uuid.uuid4())}, indent=2))
+        zip_file.writestr(f"{sm_dir}/definition.pbism", json.dumps({"version": "1.0", "settings": {}}, indent=2))
         
         # --- Report Directory ---
         rep_dir = f"{project_name}.Report"
         zip_file.writestr(f"{rep_dir}/definition.pbir", json.dumps(definition_pbir, indent=2))
-        zip_file.writestr(f"{rep_dir}/item.metadata.json", json.dumps({"type": "report"}, indent=2))
-        zip_file.writestr(f"{rep_dir}/item.config.json", json.dumps({"logicalId": str(uuid.uuid4())}, indent=2))
+        zip_file.writestr(f"{rep_dir}/item.metadata.json", json.dumps({"type": "report", "displayName": project_name}, indent=2))
+        zip_file.writestr(f"{rep_dir}/item.config.json", json.dumps({"version": "1.0", "logicalId": str(uuid.uuid4())}, indent=2))
+        
+        # Add a minimal report.json to avoid "Required artifact is missing" error
+        minimal_report = {
+            "config": "{\"version\":\"5.55\",\"themeCollection\":{\"baseTheme\":{\"name\":\"CY24SU02\",\"version\":\"5.55\",\"type\":\"SharedResources\"}},\"activeSectionIndex\":0}",
+            "layoutOptimization": 0,
+            "resourcePackages": [
+                {
+                    "resourcePackage": {
+                        "name": "SharedResources",
+                        "type": "SharedResources",
+                        "items": []
+                    }
+                }
+            ],
+            "sections": [
+                {
+                    "name": "ReportSection",
+                    "displayName": "Page 1",
+                    "displayOption": "FitToPage",
+                    "visualContainers": [],
+                    "config": "{}",
+                    "filters": "[]"
+                }
+            ]
+        }
+        zip_file.writestr(f"{rep_dir}/report.json", json.dumps(minimal_report, indent=2))
 
     return zip_buffer.getvalue()

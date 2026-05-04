@@ -1,6 +1,9 @@
 import streamlit as st
 from pbi_desktop_gen import generate_pbip_zip
 
+import tkinter as tk
+from tkinter import filedialog
+
 st.set_page_config(page_title="PBIP Generator", layout="centered")
 
 st.title("Power BI Desktop PBIP Generator")
@@ -33,14 +36,26 @@ if generate_clicked:
                 # Generate the zip file bytes in-memory
                 zip_bytes = generate_pbip_zip(sql_query, databricks_host, db_url_path)
                 
-                st.success("Project generated successfully! Click below to save it to your machine.")
+                # Use tkinter to prompt for save location
+                root = tk.Tk()
+                root.withdraw()
+                root.wm_attributes('-topmost', 1)
                 
-                # Streamlit's native way to prompt a user file save dialog
-                st.download_button(
-                    label="💾 Download PBIP Project (ZIP)",
-                    data=zip_bytes,
-                    file_name="Databricks_Analytics_PBIP.zip",
-                    mime="application/zip"
+                file_path = filedialog.asksaveasfilename(
+                    defaultextension=".zip",
+                    initialfile="Databricks_Analytics_PBIP.zip",
+                    title="Save PBIP Project",
+                    filetypes=[("ZIP files", "*.zip"), ("All files", "*.*")]
                 )
+                
+                root.destroy()
+                
+                if file_path:
+                    with open(file_path, "wb") as f:
+                        f.write(zip_bytes)
+                    st.success(f"Project generated and saved successfully to: `{file_path}`")
+                else:
+                    st.warning("Save operation cancelled.")
+                    
             except Exception as e:
                 st.error(f"An error occurred during generation: {e}")
